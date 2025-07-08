@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import './App.css'
 import Tabs from './components/Tabs.jsx'
+import BrowserNavbar from './components/BrowserNavbar.jsx'
+import SearchBar from './components/SearchBar.jsx'
 
 function App() {
   const [tabs, setTabs] = useState([
@@ -24,8 +26,10 @@ function App() {
       setActiveTabId(newTabId);
     }}
     />
+    <BrowserNavbar/>
     </div>
   );
 }
 
 export default App
+
