@@ -8,12 +8,7 @@ function App() {
 
   return (
     <div>
-      <iframe 
-        src="https://www.wikipedia.org/"
-        title="Search Engine"
-        className="w-full h-full border-0"
-        sandbox="allow-scripts"
-      />
+      
     </div>
   );
 }
