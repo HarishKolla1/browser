@@ -1,14 +1,29 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import Tabs from './components/Tabs.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const [tabs, setTabs] = useState([
+    { id: 1, title: 'Tab 1', url: 'https://bing.com' }
+  ]);
+  const [activeTabId, setActiveTabId] = useState(1);
   return (
-    <div>
-      
+    <div className="h-screen flex flex-col">
+      <Tabs
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onTabClick={setActiveTabId}
+        onNewTab={() => {
+          const newTabId = tabs.length + 1;
+      const newTab = {
+        id: newTabId,
+        title: `New Tab ${newTabId}`,
+        url: 'https://example.com',
+      };
+      setTabs([...tabs, newTab]);
+      setActiveTabId(newTabId);
+    }}
+    />
     </div>
   );
 }
