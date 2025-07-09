@@ -1,14 +1,19 @@
 import { useState } from 'react'
 import './App.css'
 import Tabs from './components/Tabs.jsx'
-import BrowserNavbar from './components/BrowserNavbar.jsx'
-import SearchBar from './components/SearchBar.jsx'
+import BrowserNavBar from './components/BrowserNavbar.jsx'
+import MainContent from './components/MainContent.jsx';
 
 function App() {
   const [tabs, setTabs] = useState([
-    { id: 1, title: 'Tab 1', url: 'https://bing.com' }
+    { id: 1, title: 'Tab 1', url: '' }
   ]);
   const [activeTabId, setActiveTabId] = useState(1);
+
+  const [query, setQuery] = useState('');
+
+  const activeTab = tabs.find(tab => tab.id === activeTabId);
+
   return (
     <div className="h-screen flex flex-col">
       <Tabs
@@ -26,7 +31,17 @@ function App() {
       setActiveTabId(newTabId);
     }}
     />
-    <BrowserNavbar/>
+
+    <BrowserNavBar
+      onSearch={(q) => {
+        console.log("Search:", q);
+        setQuery(q);
+      }}
+    />
+
+    <div className='flex-1 overflow-auto'>
+      <MainContent query={query} url={activeTab?.url} />
+    </div>
     </div>
   );
 }
