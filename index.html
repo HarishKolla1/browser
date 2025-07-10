@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' http:;
+       script-src 'self' 'unsafe-inline' 'unsafe-eval';
+       connect-src 'self' https://duckduckgo.com http://localhost:3001;
+       img-src 'self' data: http:;
+       style-src 'self' 'unsafe-inline';
+       font-src 'self' https:;
+       frame-src https:;
+       " 
+    />
     <title>My Browser</title>
   </head>
   <body>

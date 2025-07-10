@@ -12,7 +12,7 @@ const Tabs = ({tabs, activeTabId,onTabClick, onNewTab}) => {
           {tab.title}
         </button>
       ))}
-      <button onClick={onNewTab} className="px-4 py-1 rounded bg-neutral-400 hover:bg-neutral-500 text-white rounded-full">
+      <button onClick={onNewTab} className="px-4 py-1 rounded bg-neutral-400 hover:bg-neutral-500 text-white rounded">
         +
       </button>
     </div>

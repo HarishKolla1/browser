@@ -39,8 +39,11 @@ const SearchBar = ({ onSearch }) => {
     const handleSearch = (searchQuery=query) => {
         const finalQuery = String(searchQuery || '');
         setShowSuggestions(false);
-        if (onSearch && finalQuery.trim() !== "") {
-            onSearch(finalQuery.trim());
+        if(finalQuery.trim()!=""){
+            if(window.electronAPI?.sendSearch){
+                console.log("Sending search query:", finalQuery);
+                window.electronAPI.sendSearch(finalQuery.trim());
+            }
         }
     };
 
@@ -50,7 +53,7 @@ const SearchBar = ({ onSearch }) => {
     };
 
   return (
-    <div className='relative w-full max-w-lg'>
+    <div className='relative w-full'>
         {/* Input field */}
         <input
             type="text"
@@ -59,7 +62,7 @@ const SearchBar = ({ onSearch }) => {
             onChange={handleInputChange}
             onFocus={() => {if (suggestions.length) setShowSuggestions(true);}}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-            className="w-full pl-10 pr-10 py-2 rounded-full border border-gray-300 focus:ring-2 focus-ring-blue-500 transition-all"
+            className="w-full pl-10 pr-10 py-1.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm text-gray-700"
         />
 
         {/* search icon left*/}

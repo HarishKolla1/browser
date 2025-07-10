@@ -2,6 +2,7 @@ import {app, BrowserWindow, BrowserView} from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { ipcMain } from 'electron';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,8 +23,9 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      preload: path.join(__dirname, 'preload.cjs'),
     },
-  })
+  });
 
   mainwindow.loadURL('http://localhost:5173/');
 
@@ -42,10 +44,15 @@ function createWindow() {
 
   googleview.setAutoResize({width: true, height: true});
 
-  googleview.webContents.loadURL('https://www.google.com/search?q=is+google+programmable+search+engine+limited+per+day&sca_esv=06aa7bafa5db9320&rlz=1C1VDKB_enIN1051IN1051&sxsrf=AE3TifNeWP6R4qEqzrpXkkZ3NBtXsMHrvQ%3A1751978079918&ei=XxBtaKPrN6f6seMPsMruwQU&oq=is+google+programmable+search+engine+limited+per+d&gs_lp=Egxnd3Mtd2l6LXNlcnAiMmlzIGdvb2dsZSBwcm9ncmFtbWFibGUgc2VhcmNoIGVuZ2luZSBsaW1pdGVkIHBlciBkKgIIADIHECEYoAEYCjIHECEYoAEYCjIHECEYoAEYCjIFECEYnwVI1DlQugdYjitwAXgBkAEAmAHaAqABjByqAQYyLTEzLjG4AQPIAQD4AQGYAg-gAuAcwgIKEAAYsAMY1gQYR8ICChAjGIAEGCcYigXCAgYQABgWGB7CAgUQIRigAcICBBAhGBWYAwCIBgGQBgiSBwgxLjAuMTIuMqAHoUeyBwYyLTEyLjK4B9UcwgcIMC40LjEwLjHIBzk&sclient=gws-wiz-serp');
+  // googleview.webContents.loadURL('https://www.google.com/search?q=is+google+programmable+search+engine+limited+per+day&sca_esv=06aa7bafa5db9320&rlz=1C1VDKB_enIN1051IN1051&sxsrf=AE3TifNeWP6R4qEqzrpXkkZ3NBtXsMHrvQ%3A1751978079918&ei=XxBtaKPrN6f6seMPsMruwQU&oq=is+google+programmable+search+engine+limited+per+d&gs_lp=Egxnd3Mtd2l6LXNlcnAiMmlzIGdvb2dsZSBwcm9ncmFtbWFibGUgc2VhcmNoIGVuZ2luZSBsaW1pdGVkIHBlciBkKgIIADIHECEYoAEYCjIHECEYoAEYCjIHECEYoAEYCjIFECEYnwVI1DlQugdYjitwAXgBkAEAmAHaAqABjByqAQYyLTEzLjG4AQPIAQD4AQGYAg-gAuAcwgIKEAAYsAMY1gQYR8ICChAjGIAEGCcYigXCAgYQABgWGB7CAgUQIRigAcICBBAhGBWYAwCIBgGQBgiSBwgxLjAuMTIuMqAHoUeyBwYyLTEyLjK4B9UcwgcIMC40LjEwLjHIBzk&sclient=gws-wiz-serp');
 
 
 }
+
+ipcMain.on('search-query', (event, query) => {
+  const searchURL= `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+  googleview.webContents.loadURL(searchURL);
+});
 
 app.whenReady().then(() => {
   // session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
