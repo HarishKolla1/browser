@@ -60,8 +60,23 @@ const SearchBar = ({ onSearch }) => {
             placeholder="Search or enter URL"
             value={query}
             onChange={handleInputChange}
-            onFocus={() => {if (suggestions.length) setShowSuggestions(true);}}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            onFocus={() => {
+                if (suggestions.length){
+                    setShowSuggestions(true);
+                    window.electronAPI?.hideBrowserView();
+                }
+            }}
+            onBlur={() => {
+                setTimeout(() => {
+                    setShowSuggestions(false);
+                    window.electronAPI?.showBrowserView();
+                }, 150);
+            }}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            }}
             className="w-full pl-10 pr-10 py-1.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm text-gray-700"
         />
 
@@ -73,7 +88,7 @@ const SearchBar = ({ onSearch }) => {
         {/* Arrow icon (right), shown only when there is text */}
         {query.trim() !== "" && (
             <button 
-                onClick={handleSearch}
+                onClick={() => handleSearch()}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-700"
             >
                 <ArrowRightIcon className='h-5 w-5' />

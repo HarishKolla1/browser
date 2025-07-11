@@ -49,6 +49,22 @@ function createWindow() {
 
 }
 
+ipcMain.on('hide-browser-view', () =>{
+  if(mainwindow && googleview){
+    mainwindow.setBrowserView(null);
+  }
+});
+
+ipcMain.on('show-browser-view', () => {
+  if(mainwindow && googleview){
+    const bounds=mainwindow.getBounds();
+    const uiHeight=100;
+    googleview.setBounds({x:0, y: uiHeight, width: bounds.width,height: bounds.height-uiHeight});
+    mainwindow.setBrowserView(googleview);
+    googleview.setAutoResize({width: true, height: true});
+  }
+});
+
 ipcMain.on('search-query', (event, query) => {
   const searchURL= `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
   googleview.webContents.loadURL(searchURL);

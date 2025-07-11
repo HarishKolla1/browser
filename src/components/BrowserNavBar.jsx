@@ -12,7 +12,7 @@ import {
   
   const BrowserNavBar = () => {
     return (
-      <div className="flex flex-col w-full bg-white border-b shadow-sm">
+      <div className="flex flex-col w-full bg-zinc-500 border-b shadow-sm">
         <div className="flex items-center px-4 py-1.5 gap-2">
           {/* Navigation Buttons */}
           <button className="p-1.5 rounded hover:bg-gray-200 transition">
