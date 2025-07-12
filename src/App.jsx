@@ -3,6 +3,7 @@ import './App.css'
 import Tabs from './components/Tabs.jsx'
 import BrowserNavBar from './components/BrowserNavbar.jsx'
 import MainContent from './components/MainContent.jsx';
+import ThemeToggle from './components/ThemeToggle.jsx';
 
 function App() {
   const [tabs, setTabs] = useState([
@@ -13,6 +14,8 @@ function App() {
   const [query, setQuery] = useState('');
 
   const activeTab = tabs.find(tab => tab.id === activeTabId);
+
+  const [theme, setTheme] = useState('light');
 
   return (
     <div className="h-screen flex flex-col">
@@ -41,6 +44,7 @@ function App() {
 
     <div className='flex-1 overflow-auto'>
       <MainContent query={query} url={activeTab?.url} />
+      <ThemeToggle theme={theme} setTheme={setTheme} />
     </div>
     </div>
   );

@@ -20,7 +20,7 @@ const MainContent = ({ query, url, onSearch }) => {
     }
 
   return (
-    <LogoScreen onSearch={onSearch} />
+    <LogoScreen onSearch={onSearch} onShortcutClick={onSearch}/>
   );
 };
 
