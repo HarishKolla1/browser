@@ -15,13 +15,13 @@ import {
       <div className="flex flex-col w-full bg-zinc-500 border-b shadow-sm">
         <div className="flex items-center px-4 py-1.5 gap-2">
           {/* Navigation Buttons */}
-          <button className="p-1.5 rounded hover:bg-gray-200 transition">
+          <button onClick={() => window.electronAPI.goBack()} className="p-1.5 rounded hover:bg-gray-200 transition">
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
-          <button className="p-1.5 rounded hover:bg-gray-200 transition">
+          <button onClick={() => window.electronAPI.goForward()} className="p-1.5 rounded hover:bg-gray-200 transition">
             <ChevronRightIcon className="h-5 w-5" />
           </button>
-          <button className="p-1.5 rounded hover:bg-gray-200 transition">
+          <button onClick={() => window.electronAPI.reloadPage()} className="p-1.5 rounded hover:bg-gray-200 transition">
             <ArrowPathIcon className="h-5 w-5" />
           </button>
   
@@ -53,7 +53,7 @@ import {
         </div>
   
         {/* Placeholder bar */}
-        <div className="w-full h-6 bg-white flex items-center justify-center">
+        <div className="w-full h-6 bg-zinc-500 flex items-center justify-center">
           <span className="text-gray-400 text-sm">[Placeholder for additional controls or information]</span>
         </div>
       </div>
