@@ -19,6 +19,8 @@ function createWindow() {
     width,
     height,
     resizable: true,
+    frame: false,
+    titleBarStyle: 'hidden',
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -68,6 +70,47 @@ ipcMain.on('show-browser-view', () => {
 ipcMain.on('search-query', (event, query) => {
   const searchURL= `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
   googleview.webContents.loadURL(searchURL);
+});
+
+ipcMain.on('nav-back', () => {
+  if (googleview && googleview.webContents.canGoBack()) {
+    googleview.webContents.goBack();
+  }
+});
+
+ipcMain.on('nav-forward', () => {
+  if (googleview && googleview.webContents.canGoForward()) {
+    googleview.webContents.goForward();
+  }
+});
+
+ipcMain.on('nav-reload', () => {
+  if (googleview) {
+    googleview.webContents.reload();
+  }
+});
+
+ipcMain.on('minimize-window', () =>{
+  if(mainwindow){
+    mainwindow.minimize();
+  }
+});
+
+ipcMain.on('maximize-window', () =>{
+  if(mainwindow){
+    if(mainwindow.isMaximized()){
+      mainwindow.unmaximize();
+    }
+    else{
+      mainwindow.maximize();
+    }
+  }
+})
+
+ipcMain.on('close-window', () => {
+  if(mainwindow){
+    mainwindow.close();
+  }
 });
 
 app.whenReady().then(() => {
