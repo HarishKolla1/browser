@@ -1,6 +1,23 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
-const Tabs = ({tabs, activeTabId,onTabClick, onNewTab}) => {
+const Tabs = () => {
+  const [tabs, setTabs] = useState([]);
+  const [activeTabId, setActiveTabId] = useState(null);
+  useEffect(() => {
+    window.electronAPI.onTabCreated((tab) => {
+      setTabs(prev => [...prev, tab]);
+    });
+    window.electronAPI.onTabUpdated(({id, title}) => {
+      setTabs((prev => prev.map(t => t.id === id ? {...t, title} : t))
+      );
+    });
+    window.electronAPI.onTabActivated((id) => setActiveTabId(id));
+    window.electronAPI.onTabClosed((id) => {
+      setTabs((prev) => prev.filter((t) => t.id !== id));
+    });
+   }, []);
+    
+
   return(
     <div className="bg-zinc-700 border-b p2 flex justify-between items-center" 
     style={{WebkitAppRegion: 'drag'}}>
@@ -9,13 +26,17 @@ const Tabs = ({tabs, activeTabId,onTabClick, onNewTab}) => {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => onTabClick(tab.id)}
+            onClick={() => window.electronAPI.switchTab(tab.id)}
             className={`px-4 py-1 rounded ${tab.id === activeTabId ? 'bg-slate-300 border-b-2 border-slate-500' : 'bg-slate-300 hover:bg-slate-500'}`}
           >
-            {tab.title}
+            {tab.title || "New Tab"}
+            <span className="ml-2 text-red-400 hover:text-red-600" onClick={(e) => {
+              e.stopPropagation();
+              window.electronAPI.closeTab(tab.id);
+            }}>✕</span>
           </button>
         ))}
-        <button onClick={onNewTab} className="px-4 py-1 bg-neutral-400 hover:bg-neutral-500 text-white rounded">
+        <button onClick={() => window.electronAPI.newTab()} className="px-4 py-1 bg-neutral-400 hover:bg-neutral-500 text-white rounded">
           +
         </button>
       </div>
