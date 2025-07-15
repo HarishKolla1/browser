@@ -1,8 +1,7 @@
 import { ArrowRightIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import React, {useState, useEffect, useRef} from 'react';
 
-const SearchBar = ({ onSearch }) => {
-    const [query, setQuery] = useState('');
+const SearchBar = ({ onSearch, setQuery, query }) => {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const debounceTimeout = useRef(null);
@@ -44,6 +43,7 @@ const SearchBar = ({ onSearch }) => {
                 console.log("Sending search query:", finalQuery);
                 window.electronAPI.sendSearch(finalQuery.trim());
             }
+            onSearch(finalQuery);
         }
     };
 

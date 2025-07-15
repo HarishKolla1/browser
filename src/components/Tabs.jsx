@@ -1,22 +1,6 @@
 import React, {useEffect, useState} from "react";
 
-const Tabs = () => {
-  const [tabs, setTabs] = useState([]);
-  const [activeTabId, setActiveTabId] = useState(null);
-  useEffect(() => {
-    window.electronAPI.onTabCreated((tab) => {
-      setTabs(prev => [...prev, tab]);
-    });
-    window.electronAPI.onTabUpdated(({id, title}) => {
-      setTabs((prev => prev.map(t => t.id === id ? {...t, title} : t))
-      );
-    });
-    window.electronAPI.onTabActivated((id) => setActiveTabId(id));
-    window.electronAPI.onTabClosed((id) => {
-      setTabs((prev) => prev.filter((t) => t.id !== id));
-    });
-   }, []);
-    
+const Tabs = ({ tabs, activeTabId,setActiveTabId}) => {
 
   return(
     <div className="bg-zinc-700 border-b p2 flex justify-between items-center" 
@@ -26,7 +10,10 @@ const Tabs = () => {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => window.electronAPI.switchTab(tab.id)}
+            onClick={() => {
+              window.electronAPI.switchTab(tab.id);
+              setActiveTabId(tab.id);
+            }}
             className={`px-4 py-1 rounded ${tab.id === activeTabId ? 'bg-slate-300 border-b-2 border-slate-500' : 'bg-slate-300 hover:bg-slate-500'}`}
           >
             {tab.title || "New Tab"}

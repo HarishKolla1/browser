@@ -9,8 +9,8 @@ import {
   } from '@heroicons/react/24/outline';
   import React from 'react';
   import SearchBar from './SearchBar';
-  
-  const BrowserNavBar = () => {
+
+  const BrowserNavBar = ({ onSearch, query, setQuery }) => {
     return (
       <div className="flex flex-col w-full bg-zinc-500 border-b shadow-sm">
         <div className="flex items-center px-4 py-1.5 gap-2">
@@ -28,9 +28,9 @@ import {
           {/* Search Bar container takes full remaining space */}
           <div className="flex items-center flex-1 min-w-0">
             <SearchBar
-              onSearch={(query) => {
-                console.log("Search:", query);
-              }}
+              query={query}
+              setQuery={setQuery}
+              onSearch={onSearch}
             />
   
             {/* Search engine selector button */}

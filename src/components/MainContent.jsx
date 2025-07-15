@@ -11,7 +11,7 @@ const MainContent = ({ query, url, onSearch }) => {
         );
     }
 
-    if (url && url.trim() !== "") {
+    if (url && url.trim() !== '') {
       return (
         <div className='flex items-center justify-center h-full'>
           <p className='text-gray-600 text-lg'>Opening URL: <span className='font-medium'>{url}</span></p>

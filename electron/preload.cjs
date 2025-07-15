@@ -19,4 +19,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onTabUpdated: (callback) => ipcRenderer.on('tab-updated', (_e, data) => callback(data)),
     onTabActivated: (callback) => ipcRenderer.on('tab-activated', (_e, id) => callback(id)),
     onTabClosed: (callback) => ipcRenderer.on('tab-closed', (_e, id) => callback(id)),
+    onTabUrlUpdated: (callback) =>ipcRenderer.on('tab-url-updated', (_e, data) => callback(data)),
+
+    removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 });

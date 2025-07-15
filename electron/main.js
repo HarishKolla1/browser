@@ -5,14 +5,12 @@ import { dirname } from 'path';
 import { ipcMain } from 'electron';
 import { title } from 'process';
 import { act } from 'react';
+import { url } from 'inspector';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-let mainwindow;
-let tabs = [];
-let activeTabId = null;
-let nextTabId = 1;
+const windows =[];
 
 const UI_HEIGHT = 100;
 
@@ -35,54 +33,83 @@ function createWindow() {
 
   mainwindow.loadURL('http://localhost:5173/');
 
-  createNewTab();
+  const state ={
+    window: mainwindow,
+    tabs:[],
+    activeTabId: null,
+    nextTabId: 1
+  };
+
+  const firstTabId =state.nextTabId++;
+  const firstTab={
+    id:firstTabId,
+    view: null,
+    title: 'New Tab',
+    url: '',
+    query: ''
+  };
+
+  state.tabs.push(firstTab);
+  state.activeTabId=firstTabId;
+
+  windows.push(state);
+
+  setupWindowIpcHandlers(state);
 }
 
-function createNewTab(isHome = false) {
-  const id=nextTabId++;
-  let view=null;
-
-  if(!isHome){
-    view = new BrowserView({
+function createNewTab(state) {
+  const id=state.nextTabId++;
+  const view = new BrowserView({
       webPreferences: {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
     },
-    });
-  }
+  });
 
-
-
-
-  tabs.push({
+  const tab= {
     id,
     view,
-    title: isHome ? 'Home' : 'New Tab',
-    isHome,
-  });
+    title: 'New Tab',
+    query:'',
+    url:'',
+  };
 
-  setActiveTab(id);
 
-  mainwindow.webContents.send('tab-created', {
-    id,
-    title: isHome ? 'Home' : 'New Tab',
-    isHome,
-  });
 
-  if(view){
-    view.webContents.on('page-title-updated', (_, title) => {
-      const tab = tabs.find(t => t.id === id);
-      if (tab) {
-        tab.title = title;
-        mainwindow.webContents.send('tab-updated', {
+  state.tabs.push(tab);
+
+  view.webContents.on('page-title-updated', (_, title) => {
+    const t = state.tabs.find(tab => tab.id === id);
+    if (t) {
+      t.title = title;
+      state.mainwindow.webContents.send('tab-updated', {
+        id,
+        title,
+      });
+    }
+    });
+
+    view.webContents.on('did-navigate', (_, url) => {
+      const t = state.tabs.find(tab => tab.id === id);
+      if (t) {
+        t.url = url;
+        state.mainwindow.webContents.send('tab-url-updated', {
           id,
-          title,
+          url,
         });
       }
     });
+
+
+    state.mainwindow.webContents.send('tab-created', {
+      id,
+      title: 'New Tab',
+      url: '',
+    });
+
+    return id;
   }
-}
 
 function setActiveTab(id) {
   const tab = tabs.find(t => t.id === id);
@@ -92,19 +119,16 @@ function setActiveTab(id) {
 
   activeTabId = id;
 
-  if(tab.isHome || !tab.view) {
-    mainwindow.setBrowserView(null);
-  }else{
-    const bounds = mainwindow.getBounds();
-    tab.view.setBounds({
-      x: 0,
-      y: UI_HEIGHT,
-      width: bounds.width,
-      height: bounds.height - UI_HEIGHT,
-    });
-    tab.view.setAutoResize({width: true, height: true});
-    mainwindow.setBrowserView(tab.view);
-  }
+  const bounds= mainwindow.getBounds();
+
+  tab.view.setBounds({
+    x: 0,
+    y: UI_HEIGHT,
+    width: bounds.width,
+    height: bounds.height - UI_HEIGHT,
+  });
+  tab.view.setAutoResize({width: true, height: true});
+  mainwindow.setBrowserView(tab.view);
 
   mainwindow.webContents.send('tab-activated', id);
 }
@@ -133,7 +157,8 @@ function closeTab(id) {
 }
 
 ipcMain.on('tab-new', () => {
-  createNewTab();
+  const id=createNewTab();
+  setActiveTab(id);
 });
 
 ipcMain.on('tab-switch', (_, id) => {
@@ -162,20 +187,17 @@ ipcMain.on('show-browser-view', () => {
 });
 
 ipcMain.on('search-query', (_, query) => {
-  const tab= tabs.find(t => t.id === activeTabId);
+  let tab= tabs.find(t => t.id === activeTabId);
   if(!tab) {
-    return;
+    const id= createNewTab();
+    setActiveTab(id);
+    tab=tabs.find(t => t.id === id);
   }
 
-  if(tab.isHome) {
-    createNewTab(false);
-    const newTab = tabs[tabs.length - 1];
-    newTab.view.webContents.loadURL(`https://duckduckgo.com/?q=${encodeURIComponent(query)}`);
-    setActiveTab(newTab.id);
-  }
-  else if(tab.view) {
-    tab.view.webContents.loadURL(`https://duckduckgo.com/?q=${encodeURIComponent(query)}`);
-  }
+  tab.query= query;
+  const searchUrl=`https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+  tab.url=searchUrl;
+  tab.view.webContents.loadURL(searchUrl);
 });
 
 ipcMain.on('nav-back', () => {
