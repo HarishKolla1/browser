@@ -34,7 +34,7 @@ function createWindow() {
   mainwindow.loadURL('http://localhost:5173/');
 
   const state ={
-    window: mainwindow,
+    mainwindow,
     tabs:[],
     activeTabId: null,
     nextTabId: 1
@@ -111,8 +111,8 @@ function createNewTab(state) {
     return id;
   }
 
-function setActiveTab(id) {
-  const tab = tabs.find(t => t.id === id);
+function setActiveTab(state,id) {
+  const tab = state.tabs.find(t => t.id === id);
   if(!tab) {
     return;
   }
@@ -128,119 +128,131 @@ function setActiveTab(id) {
     height: bounds.height - UI_HEIGHT,
   });
   tab.view.setAutoResize({width: true, height: true});
-  mainwindow.setBrowserView(tab.view);
+  state.mainwindow.setBrowserView(tab.view);
 
-  mainwindow.webContents.send('tab-activated', id);
+  state.mainwindow.webContents.send('tab-activated', id);
 }
 
-function closeTab(id) {
-  const tabIndex = tabs.findIndex(t => t.id === id);
+function closeTab(state,id) {
+  const tabIndex = state.tabs.findIndex(t => t.id === id);
   if(tabIndex === -1) {
     return;
   }
 
-  const [tab] = tabs.splice(tabIndex, 1);
+  const [tab] = state.tabs.splice(tabIndex, 1);
   if(tab.view && typeof tab.view.destroy === 'function') {
     tab.view.destroy();
   }
-  mainwindow.webContents.send('tab-closed', id);
+  state.mainwindow.webContents.send('tab-closed', id);
 
-  if(activeTabId === id) {
-    if(tabs.length >0){
-      setActiveTab(tabs[tabs.length - 1].id);
+  if(state.activeTabId === id) {
+    if(state.tabs.length >0){
+      setActiveTab(state,state.tabs[state.tabs.length - 1].id);
     }
     else {
-      activeTabId = null;
-      mainwindow.setBrowserView(null);
+      state.activeTabId = null;
+      state.mainwindow.setBrowserView(null);
     }
   }
 }
 
-ipcMain.on('tab-new', () => {
-  const id=createNewTab();
-  setActiveTab(id);
-});
+function setupWindowIpcHandlers(state){
 
-ipcMain.on('tab-switch', (_, id) => {
-  setActiveTab(id);
-});
+  const window =state.mainwindow;
 
-ipcMain.on('tab-close', (_, id) => {
-  closeTab(id);
-});
+  ipcMain.on('tab-new', (event) => {
+    if(event.sender !=mainwindow.webContents) return;
+    const id=createNewTab(state);
+    setActiveTab(state,id);
+  });
+
+  ipcMain.on('tab-switch', (event, id) => {
+    if(event.sender!==mainwindow.webContents) return;
+    setActiveTab(state,id);
+  });
+
+  ipcMain.on('tab-close', (event, id) => {
+    if(event.sender!==mainwindow.webContents) return;
+    closeTab(state,id);
+  });
 
 
-ipcMain.on('hide-browser-view', () =>{
-  if(mainwindow && mainwindow.getBrowserView()) {
+  ipcMain.on('hide-browser-view', (event) =>{
+    if(event.sender !== mainwindow.webContents) return;
     mainwindow.setBrowserView(null);
-  }
-});
+  });
 
-ipcMain.on('show-browser-view', () => {
-  const tab = tabs.find(t => t.id === activeTabId);
-  if(tab) {
-    const bounds = mainwindow.getBounds();
-    tab.view.setBounds({x: 0, y: UI_HEIGHT, width: bounds.width, height: bounds.height - UI_HEIGHT});
-    tab.view.setAutoResize({width: true, height: true});
-    mainwindow.setBrowserView(tab.view);
-  }
-});
+  ipcMain.on('show-browser-view', (event) => {
+    if(event.sender!== mainwindow.webContents) return;
 
-ipcMain.on('search-query', (_, query) => {
-  let tab= tabs.find(t => t.id === activeTabId);
-  if(!tab) {
-    const id= createNewTab();
-    setActiveTab(id);
-    tab=tabs.find(t => t.id === id);
-  }
-
-  tab.query= query;
-  const searchUrl=`https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-  tab.url=searchUrl;
-  tab.view.webContents.loadURL(searchUrl);
-});
-
-ipcMain.on('nav-back', () => {
-  const tab = tabs.find(t => t.id === activeTabId);
-  if(tab?.view.webContents.canGoBack()) {
-    tab.view.webContents.goBack();
-  }
-});
-
-ipcMain.on('nav-forward', () => {
-  const tab = tabs.find(t => t.id === activeTabId);
-  if(tab?.view.webContents.canGoForward()) {
-    tab.view.webContents.goForward();
-  }
-});
-
-ipcMain.on('nav-reload', () => {
-  const tab = tabs.find(t => t.id === activeTabId);
-  if(tab) tab.view.webContents.reload();
-});
-
-ipcMain.on('minimize-window', () =>{
-  if(mainwindow){
-    mainwindow.minimize();
-  }
-});
-
-ipcMain.on('maximize-window', () =>{
-  if(mainwindow){
-    if(mainwindow.isMaximized()){
-      mainwindow.unmaximize();
+    const tab = state.tabs.find(t => t.id === activeTabId);
+    if(tab) {
+      const bounds = mainwindow.getBounds();
+      tab.view.setBounds({x: 0, y: UI_HEIGHT, width: bounds.width, height: bounds.height - UI_HEIGHT});
+      tab.view.setAutoResize({width: true, height: true});
+      mainwindow.setBrowserView(tab.view);
     }
-    else{
-      mainwindow.maximize();
-    }
-  }
-})
+  });
 
-ipcMain.on('close-window', () => {
-  if(mainwindow){
-    mainwindow.close();
-  }
-});
+  ipcMain.on('search-query', (event, query) => {
+    if(event.sender!==  mainwindow.webContents) return;
+    let tab= state.tabs.find(t => t.id === activeTabId);
+    if(!tab) {
+      const id= createNewTab(state);
+      setActiveTab(state,id);
+      tab=state.tabs.find(t => t.id === id);
+    }
+
+    tab.query= query;
+    const searchUrl=`https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+    tab.url=searchUrl;
+    tab.view.webContents.loadURL(searchUrl);
+  });
+
+  ipcMain.on('nav-back', (event) => {
+    const tab = tabs.find(t => t.id === activeTabId);
+    if(tab?.view.webContents.canGoBack()) {
+      tab.view.webContents.goBack();
+    }
+  });
+
+  ipcMain.on('nav-forward', () => {
+    const tab = tabs.find(t => t.id === activeTabId);
+    if(tab?.view.webContents.canGoForward()) {
+      tab.view.webContents.goForward();
+    }
+  });
+
+  ipcMain.on('nav-reload', () => {
+    const tab = tabs.find(t => t.id === activeTabId);
+    if(tab) tab.view.webContents.reload();
+  });
+
+  ipcMain.on('minimize-window', () =>{
+    if(mainwindow){
+      mainwindow.minimize();
+    }
+  });
+
+  ipcMain.on('maximize-window', () =>{
+    if(mainwindow){
+      if(mainwindow.isMaximized()){
+        mainwindow.unmaximize();
+      }
+      else{
+        mainwindow.maximize();
+      }
+    }
+  })
+
+  ipcMain.on('close-window', () => {
+    if(mainwindow){
+      mainwindow.close();
+    }
+  });
+
+}
+
 
 app.whenReady().then(() => {
   // session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
