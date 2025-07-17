@@ -34,7 +34,10 @@ import {
             />
   
             {/* Search engine selector button */}
-            <button className="flex items-center px-3 py-1.5 border rounded-full hover:bg-gray-100 transition whitespace-nowrap ml-2 shrink-0">
+            <button className="flex items-center px-3 py-1.5 border rounded-full hover:bg-gray-100 transition whitespace-nowrap ml-2 shrink-0"
+            aria-label='Select search engine'
+            title='Select search engine'
+            >
               <span className="text-sm">Google</span>
               <ChevronDownIcon className="h-4 w-4 ml-1" />
             </button>

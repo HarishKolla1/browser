@@ -3,10 +3,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { ipcMain } from 'electron';
-import { title } from 'process';
-import { act } from 'react';
-import { url } from 'inspector';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -17,7 +13,7 @@ const UI_HEIGHT = 100;
 function createWindow() {
   const width = 1200;
   const height = 800;
-  mainwindow = new BrowserWindow({
+  const mainwindow = new BrowserWindow({
     width,
     height,
     resizable: true,
@@ -40,24 +36,14 @@ function createWindow() {
     nextTabId: 1
   };
 
-  const firstTabId =state.nextTabId++;
-  const firstTab={
-    id:firstTabId,
-    view: null,
-    title: 'New Tab',
-    url: '',
-    query: ''
-  };
-
-  state.tabs.push(firstTab);
-  state.activeTabId=firstTabId;
+  createNewTab(state);
 
   windows.push(state);
 
   setupWindowIpcHandlers(state);
 }
 
-function createNewTab(state) {
+function createNewTab(state, url= '') {
   const id=state.nextTabId++;
   const view = new BrowserView({
       webPreferences: {
@@ -79,26 +65,27 @@ function createNewTab(state) {
 
   state.tabs.push(tab);
 
+  view.webContents.setWindowOpenHandler(({url}) => {
+    createNewTab(state,url);
+    return  {action: 'deny'};
+  })
+
   view.webContents.on('page-title-updated', (_, title) => {
-    const t = state.tabs.find(tab => tab.id === id);
-    if (t) {
-      t.title = title;
-      state.mainwindow.webContents.send('tab-updated', {
-        id,
-        title,
-      });
-    }
+    tab.title=title;
+    state.mainwindow.webContents.send('tab-updated', {
+      id,
+      title,
+    });
+    
     });
 
     view.webContents.on('did-navigate', (_, url) => {
-      const t = state.tabs.find(tab => tab.id === id);
-      if (t) {
-        t.url = url;
-        state.mainwindow.webContents.send('tab-url-updated', {
-          id,
-          url,
-        });
-      }
+  
+      tab.url = url;
+      state.mainwindow.webContents.send('tab-url-updated', {
+        id,
+        url,
+      });
     });
 
 
@@ -108,7 +95,12 @@ function createNewTab(state) {
       url: '',
     });
 
-    return id;
+    setActiveTab(state,id);
+
+    if(url){
+      view.webContents.loadURL(url);
+      tab.url=url;
+    }
   }
 
 function setActiveTab(state,id) {
@@ -117,9 +109,9 @@ function setActiveTab(state,id) {
     return;
   }
 
-  activeTabId = id;
+  state.activeTabId = id;
 
-  const bounds= mainwindow.getBounds();
+  const bounds= state.mainwindow.getBounds();
 
   tab.view.setBounds({
     x: 0,
@@ -140,115 +132,122 @@ function closeTab(state,id) {
   }
 
   const [tab] = state.tabs.splice(tabIndex, 1);
-  if(tab.view && typeof tab.view.destroy === 'function') {
-    tab.view.destroy();
+  if(tab?.view){
+    state.mainwindow.removeBrowserView(tab.view);
+    if(typeof tab.view.destroy === 'function'){
+      tab.view.destroy();
+    }
   }
+
   state.mainwindow.webContents.send('tab-closed', id);
 
+  if(state.tabs.length===0){
+    state.mainwindow.close();
+    return;
+  }
+
   if(state.activeTabId === id) {
-    if(state.tabs.length >0){
-      setActiveTab(state,state.tabs[state.tabs.length - 1].id);
-    }
-    else {
-      state.activeTabId = null;
-      state.mainwindow.setBrowserView(null);
-    }
+    setActiveTab(state,state.tabs[state.tabs.length - 1].id);
   }
 }
 
 function setupWindowIpcHandlers(state){
 
-  const window =state.mainwindow;
+
+  ipcMain.handle('get-initial-state', (event) =>{
+    if(event.sender!== state.mainwindow.webContents) return;
+    return {
+      tabs: state.tabs.map(t => ({ id : t.id , title: t.title, url: t.url, query: t.query})),
+      activeTabId: state.activeTabId,
+    }
+  });
 
   ipcMain.on('tab-new', (event) => {
-    if(event.sender !=mainwindow.webContents) return;
-    const id=createNewTab(state);
-    setActiveTab(state,id);
+    if(event.sender !==state.mainwindow.webContents) return;
+    createNewTab(state);
   });
 
   ipcMain.on('tab-switch', (event, id) => {
-    if(event.sender!==mainwindow.webContents) return;
+    if(event.sender!==state.mainwindow.webContents) return;
     setActiveTab(state,id);
   });
 
   ipcMain.on('tab-close', (event, id) => {
-    if(event.sender!==mainwindow.webContents) return;
+    if(event.sender!==state.mainwindow.webContents) return;
     closeTab(state,id);
   });
 
 
   ipcMain.on('hide-browser-view', (event) =>{
-    if(event.sender !== mainwindow.webContents) return;
-    mainwindow.setBrowserView(null);
+    if(event.sender !== state.mainwindow.webContents) return;
+    state.mainwindow.setBrowserView(null);
   });
 
   ipcMain.on('show-browser-view', (event) => {
-    if(event.sender!== mainwindow.webContents) return;
+    if(event.sender!== state.mainwindow.webContents) return;
 
-    const tab = state.tabs.find(t => t.id === activeTabId);
+    const tab = state.tabs.find(t => t.id === state.activeTabId);
     if(tab) {
-      const bounds = mainwindow.getBounds();
+      const bounds = state.mainwindow.getBounds();
       tab.view.setBounds({x: 0, y: UI_HEIGHT, width: bounds.width, height: bounds.height - UI_HEIGHT});
       tab.view.setAutoResize({width: true, height: true});
-      mainwindow.setBrowserView(tab.view);
+      state.mainwindow.setBrowserView(tab.view);
     }
   });
 
   ipcMain.on('search-query', (event, query) => {
-    if(event.sender!==  mainwindow.webContents) return;
-    let tab= state.tabs.find(t => t.id === activeTabId);
-    if(!tab) {
-      const id= createNewTab(state);
-      setActiveTab(state,id);
-      tab=state.tabs.find(t => t.id === id);
+    if(event.sender!==  state.mainwindow.webContents) return;
+    const tab= state.tabs.find(t => t.id === state.activeTabId);
+    if(tab) {
+      tab.query=query;
+      const searchUrl=`https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+      tab.url=searchUrl;
+      tab.view.webContents.loadURL(searchUrl);
     }
 
-    tab.query= query;
-    const searchUrl=`https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-    tab.url=searchUrl;
-    tab.view.webContents.loadURL(searchUrl);
   });
 
   ipcMain.on('nav-back', (event) => {
-    const tab = tabs.find(t => t.id === activeTabId);
+    if(event.sender!== state.mainwindow.webContents) return;
+    const tab = state.tabs.find(t => t.id === state.activeTabId);
     if(tab?.view.webContents.canGoBack()) {
       tab.view.webContents.goBack();
     }
   });
 
-  ipcMain.on('nav-forward', () => {
-    const tab = tabs.find(t => t.id === activeTabId);
+  ipcMain.on('nav-forward', (event) => {
+    if(event.sender!==  state.mainwindow.webContents) return;
+    const tab = state.tabs.find(t => t.id === state.activeTabId);
     if(tab?.view.webContents.canGoForward()) {
       tab.view.webContents.goForward();
     }
   });
 
-  ipcMain.on('nav-reload', () => {
-    const tab = tabs.find(t => t.id === activeTabId);
+  ipcMain.on('nav-reload', (event) => {
+    if(event.sender!== state.mainwindow.webContents) return;
+    const tab = state.tabs.find(t => t.id === state.activeTabId);
     if(tab) tab.view.webContents.reload();
   });
 
-  ipcMain.on('minimize-window', () =>{
-    if(mainwindow){
-      mainwindow.minimize();
-    }
+  ipcMain.on('minimize-window', (event) =>{
+    if(event.sender!== state.mainwindow.webContents) return;
+    state.mainwindow.minimize();
   });
 
-  ipcMain.on('maximize-window', () =>{
-    if(mainwindow){
-      if(mainwindow.isMaximized()){
-        mainwindow.unmaximize();
-      }
-      else{
-        mainwindow.maximize();
-      }
+  ipcMain.on('maximize-window', (event) =>{
+    if(event.sender!== state.mainwindow.webContents) return;
+    if(state.mainwindow.isMaximized()){
+      state.mainwindow.unmaximize();
+    }
+    else{
+      state.mainwindow.maximize();
     }
   })
 
-  ipcMain.on('close-window', () => {
-    if(mainwindow){
-      mainwindow.close();
-    }
+  ipcMain.on('close-window', (event) => {
+    if(event.sender!== state.mainwindow.webContents) return;
+    state.mainwindow.close();
+  
   });
 
 }

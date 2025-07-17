@@ -2,24 +2,30 @@ import React, {useEffect, useState} from "react";
 
 const Tabs = ({ tabs, activeTabId,setActiveTabId}) => {
 
+  const handleTabSwitch =(id) =>{
+    window.electronAPI?.switchTab(id);
+    setActiveTabId(id);
+  }
+
+  const handleTabClose =(e,id) =>{
+    e.stopPropagation();
+    window.electronAPI?.closeTab(id);
+  }
+
   return(
-    <div className="bg-zinc-700 border-b p2 flex justify-between items-center" 
+    <div className="bg-zinc-700 border-b p-2 flex justify-between items-center" 
     style={{WebkitAppRegion: 'drag'}}>
 
       <div className="flex space-x-1" style={{WebkitAppRegion: 'no-drag'}}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => {
-              window.electronAPI.switchTab(tab.id);
-              setActiveTabId(tab.id);
-            }}
+            onClick={() => handleTabSwitch(tab.id)}
             className={`px-4 py-1 rounded ${tab.id === activeTabId ? 'bg-slate-300 border-b-2 border-slate-500' : 'bg-slate-300 hover:bg-slate-500'}`}
           >
             {tab.title || "New Tab"}
             <span className="ml-2 text-red-400 hover:text-red-600" onClick={(e) => {
-              e.stopPropagation();
-              window.electronAPI.closeTab(tab.id);
+              handleTabClose(e,tab.id)
             }}>✕</span>
           </button>
         ))}

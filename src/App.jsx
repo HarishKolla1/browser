@@ -6,12 +6,19 @@ import MainContent from './components/MainContent.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
 
 function App() {
-  const [query, setQuery] = useState("");
   const [theme, setTheme] = useState("light");
   const [activeTabId, setActiveTabId] = useState(null);
   const [tabs, setTabs] = useState([]);
 
   useEffect(() => {
+    if(!window.electronAPI) return;
+
+    window.electronAPI.getInitialState().then(initialState => {
+      if(initialState){
+        setTabs(initialState.tabs);
+        setActiveTabId(initialState.activeTabId);
+      }
+    })
     const handleTabCreated = (tab) => {
       setTabs(prev => [...prev, { ...tab, query: "" }]);
       setActiveTabId(tab.id);

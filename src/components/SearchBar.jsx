@@ -6,6 +6,13 @@ const SearchBar = ({ onSearch, setQuery, query }) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const debounceTimeout = useRef(null);
 
+
+    useEffect(() => {
+        return () => {
+            if(debounceTimeout.current) clearTimeout(debounceTimeout.current);
+        };
+    },[]);
+
     const fetchSuggestions = (q) => {
         if(!q.trim()) {
             setSuggestions([]);
@@ -27,6 +34,10 @@ const SearchBar = ({ onSearch, setQuery, query }) => {
         const val = e.target.value;
         setQuery(val);
 
+        if(val.trim()){
+            window.electronAPI?.hideBrowserView();
+        }
+
         if(debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
         }
@@ -36,13 +47,12 @@ const SearchBar = ({ onSearch, setQuery, query }) => {
     };
 
     const handleSearch = (searchQuery=query) => {
-        const finalQuery = String(searchQuery || '');
+        const finalQuery = String(searchQuery || '').trim();
         setShowSuggestions(false);
-        if(finalQuery.trim()!=""){
-            if(window.electronAPI?.sendSearch){
-                console.log("Sending search query:", finalQuery);
-                window.electronAPI.sendSearch(finalQuery.trim());
-            }
+        if(finalQuery!=""){
+            setSuggestions([]);
+            window.electronAPI.sendSearch(finalQuery);
+            window.electronAPI.showBrowserView();
             onSearch(finalQuery);
         }
     };
@@ -69,7 +79,9 @@ const SearchBar = ({ onSearch, setQuery, query }) => {
             onBlur={() => {
                 setTimeout(() => {
                     setShowSuggestions(false);
-                    window.electronAPI?.showBrowserView();
+                    if(window.electronAPI.showBrowserView){
+                        window.electronAPI.showBrowserView();
+                    }
                 }, 150);
             }}
             onKeyDown={(e) => {
