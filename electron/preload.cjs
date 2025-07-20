@@ -24,5 +24,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     getInitialState: () => ipcRenderer.invoke('get-initial-state'),
 
+    openAccountWindow: () => ipcRenderer.invoke('open-account-window'),
+    getCurrentUser: () => ipcRenderer.invoke('get-current-user'),
+
+    login: (email,password) => ipcRenderer.invoke('login',{email,password}),
+    signup: (email, password) => ipcRenderer.invoke('signup', {email, password}),
+    logout: () =>ipcRenderer.invoke('logout'),
+
+    onCurrentUser: (callback) => ipcRenderer.on('current-user',(_e,user) => callback(user)),
+
+
     removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 });

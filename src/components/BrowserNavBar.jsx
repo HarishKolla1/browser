@@ -44,7 +44,8 @@ import {
           </div>
   
           {/* Right side icons */}
-          <button className="p-1.5 rounded hover:bg-gray-200 transition">
+          <button className="p-1.5 rounded hover:bg-gray-200 transition"
+          aria-label='Open Account' title="Open Account" onClick={() => window.electronAPI.openAccountWindow()}>
             <UserCircleIcon className="h-5 w-5" />
           </button>
           <button className="p-1.5 rounded hover:bg-gray-200 transition">

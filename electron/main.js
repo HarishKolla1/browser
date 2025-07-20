@@ -3,12 +3,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { ipcMain } from 'electron';
+import {findUserByEmail ,createUser, validateUser} from '../src/auth.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const windows =[];
 
 const UI_HEIGHT = 100;
+
+let currentUser=null;
 
 function createWindow() {
   const width = 1200;
@@ -153,6 +157,56 @@ function closeTab(state,id) {
 
 function setupWindowIpcHandlers(state){
 
+  ipcMain.handle('get-current-user', () => currentUser);
+
+  ipcMain.handle('login', async (_e, {email, password}) =>{
+    const isValid= await validateUser(email,password);
+    if(!isValid){
+      return {success: false, message: 'Invalid email or password'};
+    }
+    currentUser={email};
+    return {success: true, message:'Login successfull' ,user: currentUser};
+  });
+
+  ipcMain.handle('signup', async (_e,{email,password}) =>{
+    const existingUser= await findUserByEmail(email);
+    
+    if(existingUser){
+      return {success: false, message: 'Useralready exists'};
+    }
+    createUser(email,password);
+    currentUser={email};
+    return {success: true, message: 'Signup succesful', user: currentUser};
+  });
+
+  ipcMain.handle('logout', async () =>{
+    currentUser=null;
+    return {success: true};
+  });
+
+
+  ipcMain.handle('open-account-window', () =>{
+    const accountWindow=new BrowserWindow({
+      width: 300,
+      height: 400,
+      parent: state.mainwindow,
+      modal: true,
+      frame: false,
+      resizable: false,
+      webPreferences: {
+        nodeIntegration:false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'preload.cjs'),
+      },
+
+    });
+    accountWindow.loadURL('http://localhost:5173/account');
+
+    accountWindow.webContents.on('did-finish-load',() => {
+      accountWindow.webContents.send('current-user',currentUser);
+    });
+  });
+
 
   ipcMain.handle('get-initial-state', (event) =>{
     if(event.sender!== state.mainwindow.webContents) return;
@@ -249,6 +303,8 @@ function setupWindowIpcHandlers(state){
     state.mainwindow.close();
   
   });
+
+
 
 }
 
