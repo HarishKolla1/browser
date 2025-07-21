@@ -1,5 +1,5 @@
 import db from './database.js';
-import bcrypt from 'bycryptjs';
+import bcrypt from 'bcryptjs';
 
 export function findUserByEmail(email){
     return db.prepare('SELECT * FROM Users WHERE email= ?').get(email);

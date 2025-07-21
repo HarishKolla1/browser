@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { ipcMain } from 'electron';
 import {findUserByEmail ,createUser, validateUser} from '../src/auth.js';
+import { createProfileForUser, getProfileForUser, addProfileForUser } from '../src/profiles.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -174,8 +175,10 @@ function setupWindowIpcHandlers(state){
     if(existingUser){
       return {success: false, message: 'Useralready exists'};
     }
-    createUser(email,password);
-    currentUser={email};
+    const user= createUser(email,password);
+    currentUser={email , user_id: user.user_id};
+    createProfileForUser(user.user_id, 'Default');
+
     return {success: true, message: 'Signup succesful', user: currentUser};
   });
 
@@ -206,6 +209,7 @@ function setupWindowIpcHandlers(state){
       accountWindow.webContents.send('current-user',currentUser);
     });
   });
+
 
 
   ipcMain.handle('get-initial-state', (event) =>{

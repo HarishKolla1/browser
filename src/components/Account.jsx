@@ -60,7 +60,7 @@ function Account(){
     return(
         <div style={{ padding: 20, textAlign: 'center'}}>
             <h2>
-                { mode=== 'Login' ? 'Login' : 'Sign Up'}
+                { mode=== 'login' ? 'Login' : 'Sign Up'}
             </h2>
 
             <input type="email" placeholder="Email" className="border p-2 w-full" value={email} onChange={(e) => setEmail(e.target.value)}/>
@@ -73,7 +73,7 @@ function Account(){
                 onChange={(e) => setPassword(e.target.value)}
             />
             
-            {mode=== 'Login'? (
+            {mode=== 'login'? (
                 <>
                     <button onClick={handleLogin} className="bg-blue-500 text-white px-4 py-2 rounded">Login </button>
                     <p>
