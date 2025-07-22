@@ -33,6 +33,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     onCurrentUser: (callback) => ipcRenderer.on('current-user',(_e,user) => callback(user)),
 
+    getProfiles: (userId) => ipcRenderer.invoke('get-profiles', userId),
+    addProfile: (userId, profileName) =>ipcRenderer.invoke('add-profile', {userId,profileName}),
+    
 
     removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 });

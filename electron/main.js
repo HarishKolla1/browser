@@ -187,6 +187,14 @@ function setupWindowIpcHandlers(state){
     return {success: true};
   });
 
+  ipcMain.handle('get-profiles' , (_e,userId) =>{
+    return getProfileForUser(userId);
+  });
+
+  ipcMain.handle('add-profile', (_e,{userId, profileName}) => {
+    return addProfileForUser(userId, profileName);
+  });
+
 
   ipcMain.handle('open-account-window', () =>{
     const accountWindow=new BrowserWindow({
