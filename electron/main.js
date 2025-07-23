@@ -9,7 +9,7 @@ import { createProfileForUser, getProfileForUser, addProfileForUser } from '../s
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const windows =[];
+
 
 const UI_HEIGHT = 100;
 
@@ -43,7 +43,6 @@ function createWindow() {
 
   createNewTab(state);
 
-  windows.push(state);
 
   setupWindowIpcHandlers(state);
 }
@@ -161,11 +160,12 @@ function setupWindowIpcHandlers(state){
   ipcMain.handle('get-current-user', () => currentUser);
 
   ipcMain.handle('login', async (_e, {email, password}) =>{
-    const isValid= await validateUser(email,password);
+    const isValid= validateUser(email,password);
     if(!isValid){
       return {success: false, message: 'Invalid email or password'};
     }
-    currentUser={email};
+    const user= findUserByEmail(email);
+    currentUser= {user_id: user.user_id,email: user.email};
     return {success: true, message:'Login successfull' ,user: currentUser};
   });
 
@@ -176,7 +176,7 @@ function setupWindowIpcHandlers(state){
       return {success: false, message: 'Useralready exists'};
     }
     const user= createUser(email,password);
-    currentUser={email , user_id: user.user_id};
+    currentUser={user_id: user.user_id, email: user.email};;
     createProfileForUser(user.user_id, 'Default');
 
     return {success: true, message: 'Signup succesful', user: currentUser};

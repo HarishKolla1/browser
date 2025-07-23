@@ -1,7 +1,7 @@
 import db from './database.js';
 
 export function createProfileForUser(userID, profileName){
-    const cpfu= db.prepare('INSERT INTO Profiles (userid, profile_name) VALUES (?,?)');
+    const cpfu= db.prepare('INSERT INTO Profiles (user_id, profile_name) VALUES (?,?)');
     cpfu.run(userID,profileName);
 }
 
