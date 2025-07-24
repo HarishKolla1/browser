@@ -60,7 +60,7 @@ function Account(){
     }
 
     return(
-        <div style={{ padding: 20, textAlign: 'center'}}>
+        <div style={{ padding: 10, textAlign: 'center'}}>
             <h2>
                 { mode=== 'login' ? 'Login' : 'Sign Up'}
             </h2>
