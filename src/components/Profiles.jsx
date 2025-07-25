@@ -28,11 +28,11 @@ function Profiles({userId}){
         <div className="mt-4">
             <h3 className="font-semibold">Profiles:</h3>
             {profiles.length === 0?  (
-                <p className="text-gray-500">No profiles yet.</p>
+                <p className="text-gray-500">No profiles added.</p>
             ):(
             <ul className="list-disc list-inside">
                 {profiles.map(profile =>(
-                    <li key={profile.profile_id}>
+                    <li key={profile.profile_id} >
                         {
                             profile.profile_name
                         }

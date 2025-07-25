@@ -6,6 +6,8 @@ import { ipcMain } from 'electron';
 import {findUserByEmail ,createUser, validateUser} from '../src/auth.js';
 import { createProfileForUser, getProfileForUser, addProfileForUser } from '../src/profiles.js';
 
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

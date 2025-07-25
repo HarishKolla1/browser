@@ -54,7 +54,7 @@ function Account(){
                 <h2> Hello, {user.email}</h2>
                 <Profiles userId={user.user_id}/>
                 <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded"> Logout </button>
-                <button onClick={handleClose} className="text-gray-500 mt-4"> close</button>
+                <button onClick={handleClose} className="text-gray-500 mt-4"> close </button>
             </div>
         )
     }
