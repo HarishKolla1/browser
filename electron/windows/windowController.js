@@ -1,14 +1,15 @@
-import { BrowserWindow , BrowserView} from "electron";
+import { BrowserWindow} from "electron";
 import { path } from "path";
+import TabManager from '../tabs/tabManager.js';
 
 class windowController {
     constructor(){
         const lastUser=getUserSession();
         const width = 1200;
         const height = 800;
+
         this.user=lastUser;
-        this.tabs= new Map();
-        this.nextTabId=1;
+        
         this.window = new BrowserWindow({
             width: width,
             height: height,
@@ -20,18 +21,16 @@ class windowController {
                 nodeIntegration:false,
                 sandbox: true,
             }
-    });
+        });
 
             //restoreWindowState(this.window, this.user);
+        this.window.loadURL("http://localhost:5173/");
 
-            this.window.loadURL('http://localhost:5173/');
+        this.tabManager = new TabManager(this.window);
 
-            this.createNewTab();
-            this.window.on('closed',()=>{
-                this.tabs.clear();
-                this.window=null;
-            });
-        
+        this.tabManager.createTab()
+    }
+}
 
 
 
