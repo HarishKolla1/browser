@@ -1,23 +1,22 @@
-import {BrowserView, ipcMain} from 'electron';
+import {BrowserView} from 'electron';
+import Tab from './tabModel.js';
+
 
 class TabManager {
     constructor(window){
         this.window=window;
         this.tabs=new Map();
         this.nextTabId=1;
-        //this.activeTabId=null;
+        this.activeTabId=null;
 
-        this.setupIPC();
+        //this.setupIPC();
     }
 
     createTab(url=''){
         const id=this.nextTabId++;
-        const view=new BrowserView();
         const tab= new Tab(id,url);
-        tab.setView(view);
         this.tabs.set(id,tab);
-
-        view.webContents.loadURL(url);
+        this.setActiveTab(id);
         return id;
     }
 
@@ -27,13 +26,22 @@ class TabManager {
             return;
         }
         if(this.activeTabId!=null){
-            const prevTab=this.tabsget(this.activeTabId);
+            const prevTab=this.tabs.get(this.activeTabId);
             if(prevTab?.view){
                 this.window.removeBrowserView(prevTab.view);
             }
         }
+        this.activeTabId=id;
         this.window.setBrowserView(tab.view);
-        tab.view.setBounds({x:0,y:40, width:this.window.getBounds().width,height:this.window.getBounds().height-40});
+
+        const bounds=this.window.getBounds();
+        tab.view.setBounds({
+            x:0,
+            y:40,
+            width:bounds.width,
+            height: bounds.height-40
+        });
+        tab.view.setAutoResize({width: true,height: true});
     }
     closeTab(id){
         const tab=this.tabs.get(id);
@@ -52,6 +60,21 @@ class TabManager {
                 this.activeTabId=null;
             }
         }
+
+        if(this.tabs.size()===0){
+            this.window.close();
+        }
+    }
+
+    destroyAllTabs(){
+        this.tabs.forEach(tab => {
+            if(tab.view && !tab.view.isDestroyed()){
+                this.window.removeBrowserView(tab.view);
+                tab.view.destroy();
+            }
+        });
+        this.tabs.clear();
+        this.activeTabId=null;
     }
 
     getActiveTab(){
@@ -74,11 +97,6 @@ class TabManager {
         return tab?.query;
     }
 
-    addTab(url=''){
-        const tabId=this.nextTabId++;
-        this.tabs.set(tabId,{url});
-
-
-    }
-
 }
+
+export default TabManager;

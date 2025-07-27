@@ -1,15 +1,14 @@
 import { BrowserWindow} from "electron";
-import { path } from "path";
 import TabManager from '../tabs/tabManager.js';
 
-class windowController {
-    constructor(){
-        const lastUser=getUserSession();
+class WindowController {
+    constructor(userId,id){
         const width = 1200;
         const height = 800;
 
-        this.user=lastUser;
-        
+        this.user=userId;
+        this.id=id;
+
         this.window = new BrowserWindow({
             width: width,
             height: height,
@@ -28,11 +27,18 @@ class windowController {
 
         this.tabManager = new TabManager(this.window);
 
-        this.tabManager.createTab()
+        this.tabManager.createTab();
+
+        this.window.on('ready-to-show', () => {
+            this.window.show();
+        })
+
+        this.window.on("closed",() =>{
+            this.tabManager.destoryAllTabs();
+            this.window=null;
+        });
     }
 }
 
+export default WindowController;
 
-
-    }
-}

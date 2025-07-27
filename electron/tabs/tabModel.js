@@ -1,3 +1,4 @@
+import { BrowserView } from "electron";
 
 
 class Tab{
@@ -6,7 +7,26 @@ class Tab{
         this.url=url;
         this.title=title;
         this.query="";
-        this.view=null;
+        this.view= this.creteBrowserView();
+        this.loadURL(url);
+    }
+
+    creteBrowserView(){
+        const view=new BrowserView({
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+                sandbox: true,
+            }
+        });
+
+        return view;
+    }
+
+    loadURL(url){
+        if(url && this.view){
+            this.view.webContents.loadURL(url);
+        }
     }
     setURL(newUrl){
         this.url=newUrl;
