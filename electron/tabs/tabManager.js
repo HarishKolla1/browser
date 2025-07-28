@@ -42,6 +42,7 @@ class TabManager {
             height: bounds.height-40
         });
         tab.view.setAutoResize({width: true,height: true});
+        window.webContents.send('tab-activated' ,id);
     }
     closeTab(id){
         const tab=this.tabs.get(id);
@@ -51,6 +52,13 @@ class TabManager {
             tab.view.destroy();
         }
         this.tabs.delete(id);
+        this.window.webContents.send('tab-closed',id);
+
+        if(this.tabs.size()===0){
+            this.window.close();
+            return;
+        }
+
         if(this.activeTabId ===id){
             const nextTabId=this.tabs.keys().next().value();
             if(nextTabId!=undefined){
@@ -59,10 +67,6 @@ class TabManager {
             else{
                 this.activeTabId=null;
             }
-        }
-
-        if(this.tabs.size()===0){
-            this.window.close();
         }
     }
 
@@ -89,6 +93,16 @@ class TabManager {
         const tab= this.tabs.get(id);
         if(tab){
             tab.setQuery(query);
+        }
+    }
+
+    loadTabUrl(query){
+        const tab =this.tabs.getActiveTab();
+        if(tab){
+            tab.setQuery(query);
+            const searchUrl=`https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+            tab.searchURL(searchUrl);
+            tab.loadURL(searchUrl);
         }
     }
 

@@ -3,7 +3,7 @@ import { ipcRenderer } from "electron";
 const userAPI ={
 
     openAccountWindow: ()=> ipcRenderer.invoke('open-account-window'),
-    getCuurentUser:() => ipcRenderer.invoke('get-current-user'),
+    getCurentUser:() => ipcRenderer.invoke('get-current-user'),
 
     login: (email,password) => ipcRenderer.invoke('login', {email,password}),
     signup: (email,password) =>ipcRenderer.invoke('signup',{email,password}),

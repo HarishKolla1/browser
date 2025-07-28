@@ -1,13 +1,19 @@
-import { use } from "react";
+
+import { getCurentUser } from "../main/userSession";
 import WindowController from "./windowController";
 
 const windowMap= new Map();
 
 let windowCounter=0;
 
-function createWindow(userId){
+function createWindow(){
     const id=++windowCounter;
-    const controller = new WindowController(id,userId);
+    this.user=getCurrentUser();
+    this.userId=null;
+    if(this.user.user_id !=null){
+        this.userId=this.user.user_id;
+    }
+    const controller = new WindowController(id,userId,profile=''); //profiles
     windowMap.set(id,controller);
 
     controller.window.on("closed",() =>{
@@ -17,12 +23,17 @@ function createWindow(userId){
     return controller;
 }
 
-function getWindowById(id){
-    return windowMap.get(id);
+function getWindow(win){
+    for(const[id, controller] of windowMap.entries()){
+        if(controller.window===win){
+            return controller;
+        }
+    }
+    return null;
 }
 
 function getAllWindows(){
     return Array.from(windowMap.values());
 }
 
-export {createWindow, getWindowById, getAllWindows};
+export {createWindow, getWindow, getAllWindows};
