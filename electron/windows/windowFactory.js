@@ -1,39 +1,16 @@
 
-import { getCurentUser } from "../main/userSession";
-import WindowController from "./windowController";
+import { getCurrentUser } from "../main/userSession.js";
+import WindowController from "./windowController.js";
 
-const windowMap= new Map();
-
-let windowCounter=0;
 
 function createWindow(){
-    const id=++windowCounter;
-    this.user=getCurrentUser();
-    this.userId=null;
-    if(this.user.user_id !=null){
-        this.userId=this.user.user_id;
-    }
-    const controller = new WindowController(id,userId,profile=''); //profiles
-    windowMap.set(id,controller);
+    const user=getCurrentUser();
+    const userId=user?.user_id?? null;
+    const profile='';
+    const controller = new WindowController(id,userId,profile); //profiles
 
-    controller.window.on("closed",() =>{
-        windowMap.delete(id);
-    })
-
-    return controller;
+    setupWindowIpcHandlers(controller);
+    
 }
 
-function getWindow(win){
-    for(const[id, controller] of windowMap.entries()){
-        if(controller.window===win){
-            return controller;
-        }
-    }
-    return null;
-}
-
-function getAllWindows(){
-    return Array.from(windowMap.values());
-}
-
-export {createWindow, getWindow, getAllWindows};
+export {createWindow};

@@ -1,18 +1,18 @@
-import { create } from "domain";
+
 import { BrowserView } from "electron";
 
 
-class Tab{
-    constructor(id, url='', title='New Tab'){
+export default class Tab{
+    constructor(id, url='', title='New Tab',window){
         this.id=id;
         this.url=url;
+        this.window=window;
         this.title=title;
         this.query="";
-        this.view= this.creteBrowserView();
-        this.loadURL(url);
+        this.view= this.createBrowserView();
     }
 
-    creteBrowserView(){
+    createBrowserView(){
         const view=new BrowserView({
             webPreferences: {
                 nodeIntegration: false,
@@ -20,29 +20,19 @@ class Tab{
                 sandbox: true,
             }
         });
-
         return view;
     }
 
-    loadURL(url){
-        if(url && this.view){
-            this.view.webContents.loadURL(url);
-        }
+    toSerializable(){
+        const id=this.id;
+        const title=this.title;
+        const url =this.url;
+        const query=this.query;
+        return{
+            id,
+            title,
+            url,
+            query,
+        };
     }
-    setURL(newUrl){
-        this.url=newUrl;
-    }
-
-    setTitle(newTitle){
-        this.title=newTitle;
-    }
-    setView(browserView){
-        this.view=browserView;
-    }
-
-    setQuery(newQuery){
-        this.query=newQuery;
-    }
-}
-
-module.exports=Tab;
+};

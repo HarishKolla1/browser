@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain } from "electron";
-import { getWindow } from "../windows/windowFactory";
-import { clearCurrentUser, getCurrentUser } from "../main/userSession";
-import { addProfileForUser, getProfileForUser } from "../db/profiles";
+import { getWindow } from "../windows/windowFactory.js";
+import { clearCurrentUser, getCurrentUser } from "../main/userSession.js";
+import { addProfileForUser, getProfileForUser } from "../db/profiles.js";
 
 
 export default function registerAccountHandlers(){

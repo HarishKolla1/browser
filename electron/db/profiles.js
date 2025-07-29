@@ -1,4 +1,4 @@
-import db from './database.js';
+import db from './init.js';
 
 export function createProfileForUser(userID, profileName){
     const cpfu= db.prepare('INSERT INTO Profiles (user_id, profile_name) VALUES (?,?)');

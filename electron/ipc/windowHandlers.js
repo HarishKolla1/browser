@@ -1,6 +1,6 @@
 import {ipcMain ,BrowserWindow} from 'electron';
-import { createWindow, getWindow } from '../windows/windowFactory';
-import { getCurrentUser } from '../main/userSession';
+import { createWindow, getWindow } from '../windows/windowFactory.js';
+import { getCurrentUser } from '../main/userSession.js';
 
 
 export default function registerWindowHandlers(){
@@ -33,7 +33,7 @@ export default function registerWindowHandlers(){
         if(controller){
             controller.hideBrowserView();
         }
-    })
+    });
 
     ipcMain.on('show-browser-view', (event) =>{
         const win=BrowserWindow.fromWebContents(event.sender);
@@ -41,10 +41,27 @@ export default function registerWindowHandlers(){
         if(controller){
             controller.showBrowserView();
         }
-    })
+    });
 
     ipcMain.on('new-window', () =>{
         const userId= getCurrentUser();
         createWindow(userId);
+        if (!controller) {
+            console.warn('No controller for tab-new event');
+            return;
+        }
+    });
+
+    ipcMain.handle('get-initial-state', (event) =>{
+        const win = BrowserWindow.fromWebContents(event.sender);
+        const controller=getWindow(win);
+        
+        return { 
+            tabs: Array.from(controller.tabManager.tabs.entries()).map(([id,tab]) => ({
+                id,
+                title,
+            })),
+            activeTabId: controller.tabManager.activeTabId,
+        }
     })
 }

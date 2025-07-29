@@ -1,4 +1,4 @@
-import db from './database.js';
+import db from './init.js';
 import bcrypt from 'bcryptjs';
 
 export function findUserByEmail(email){

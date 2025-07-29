@@ -1,10 +1,10 @@
-import { ipcMain,BrowserView } from "electron";
-import { getWindow } from "../windows/windowFactory";
+import { ipcMain,BrowserWindow } from "electron";
+import { getWindow } from "../windows/windowFactory.js";
 
 
 export default function registerTabHandlers(){
     ipcMain.on('nav-back', (event) =>{
-        const win=BrowserView.fromWebContents(event.sender);
+        const win=BrowserWindow.fromWebContents(event.sender);
         const controller=getWindow(win);
         if(controller){
             const tab= controller.tabManager.getActiveTab();
@@ -15,7 +15,7 @@ export default function registerTabHandlers(){
     });
 
     ipcMain.on('nav-forward', (event) =>{
-        const win=BrowserView.fromWebContents(event.sender);
+        const win=BrowserWindow.fromWebContents(event.sender);
         const controller=getWindow(win);
         if(controller){
             const tab= controller.tabManager.getActiveTab();
@@ -23,10 +23,14 @@ export default function registerTabHandlers(){
                 tab.view.webContents.goForward();
             }
         }
+        if (!controller) {
+            console.warn('No controller for tab-new event');
+            return;
+        }
     });
 
     ipcMain.on('reload', (event) => {
-        const win=BrowserView.fromWebContents(event.sender);
+        const win=BrowserWindow.fromWebContents(event.sender);
         const controller=getWindow(win);
         if(controller){
             const tab= controller.tabManager.getActiveTab();
@@ -37,7 +41,7 @@ export default function registerTabHandlers(){
     });
 
     ipcMain.on('search-query', (event,query) => {
-        const win=BrowserView.fromWebContents(event.sender);
+        const win=BrowserWindow.fromWebContents(event.sender);
         const controller=getWindow(win);
         if(controller){
             controller.tabManager.loadTabUrl(query);
@@ -46,7 +50,7 @@ export default function registerTabHandlers(){
     });
 
     ipcMain.on('tab-new', (event)=> {
-        const win=BrowserView.fromWebContents(event.sender);
+        const win=BrowserWindow.fromWebContents(event.sender);
         const controller=getWindow(win);
         if(controller){
             const id=controller.tabManager.createTab();
@@ -55,7 +59,7 @@ export default function registerTabHandlers(){
     });
 
     ipcMain.on('tab-switch', (event,id) => {
-        const win=BrowserView.fromWebContents(event.sender);
+        const win=BrowserWindow.fromWebContents(event.sender);
         const controller=getWindow(win);
         if(controller){
             controller.tabManager.setActiveTab(id);
@@ -63,7 +67,7 @@ export default function registerTabHandlers(){
     });
 
     ipcMain.on('close-tab', (event,id) => {
-        const win=BrowserView.fromWebContents(event.sender);
+        const win=BrowserWindow.fromWebContents(event.sender);
         const controller=getWindow(win);
         if(controller){
             controller.tabManager.closeTab(id);

@@ -11,6 +11,8 @@ const navigationAPI ={
 
     hideBrowserView: () => ipcRenderer.send('hide-browser-view'),
     showBrowserView: () => ipcRenderer.send('show-browser-view'),
+
+    getInitialState: () => ipcRenderer.invoke('get-initial-state'),
 };
 
 export default navigationAPI;
