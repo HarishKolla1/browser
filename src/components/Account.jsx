@@ -48,7 +48,7 @@ function Account() {
   if (user) {
     return (
       <div className="p-6 max-w-md mx-auto bg-white shadow-md rounded-xl space-y-6 text-center">
-        <h2 className="text-xl font-semibold">Hello, {user.email}</h2>
+        <h2 className="text-xl font-semibold">Hello!, {user.email}</h2>
         <Profiles userId={user.user_id} />
         <div className="flex flex-col space-y-3">
           <button
