@@ -5,7 +5,6 @@ const websites = [
     { name: 'YouTube', url: 'https://www.youtube.com', icon: '▶️' },
     { name: 'GitHub', url: 'https://www.github.com', icon: '🐱' },
     { name: 'Twitter', url: 'https://www.twitter.com', icon: '🐦' },
-    { name: 'LinkedIn', url: 'https://www.linkedin.com', icon: '💼' },
     { name: 'Add Shortcut', url: '#', icon: '+' },
 ];
 
