@@ -3,6 +3,7 @@ import TabManager from '../tabs/tabManager.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import AccountWindow from '../account/accountWindow.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,9 +13,6 @@ class WindowController {
     constructor(userId,profile){
         const width = 1200;
         const height = 800;
-
-        this.user=userId;
-        this.profile=profile;
 
         this.window = new BrowserWindow({
             width,
@@ -35,6 +33,7 @@ class WindowController {
         this.window.loadURL("http://localhost:5173/");
 
         this.tabManager = new TabManager(this.window);
+        this.AccountWindow=new AccountWindow(this.window);
 
         this.tabManager.createTab();
 

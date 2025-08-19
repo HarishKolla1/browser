@@ -1,8 +1,14 @@
 import db from './init.js';
 
 export function createProfileForUser(userID, profileName){
-    const cpfu= db.prepare('INSERT INTO Profiles (user_id, profile_name) VALUES (?,?)');
-    cpfu.run(userID,profileName);
+    const stmt= db.prepare('INSERT INTO Profiles (user_id, profile_name) VALUES (?,?)');
+    const result=stmt.run(userID,profileName);
+
+    return {
+        userID: userID,
+        profileName: profileName,
+        profileId:result.lastInsertRowid
+    }
 }
 
 export function getProfileForUser(userID){
