@@ -43,13 +43,13 @@ const dummyNews = [
 
 const NewsSection = () => {
   return (
-    <div className="bg-white rounded shadow p-4 h-[30rem] overflow-y-auto">
+    <div className="rounded shadow p-4 h-[30rem] overflow-y-auto">
       <h2 className="text-lg font-semibold mb-3 text-gray-700">Trending News</h2>
       <div className="space-y-3">
         {dummyNews.map((news, index) => (
           <div
             key={index}
-            className="p-3 bg-gray-50 rounded hover:bg-gray-100 transition"
+            className="p-3 rounded hover:bg-gray-100 transition"
           >
             <h3 className="text-md font-medium">{news.title}</h3>
             <p className="text-gray-600 text-sm">{news.description}</p>

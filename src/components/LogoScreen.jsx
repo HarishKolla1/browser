@@ -21,7 +21,7 @@ const LogoScreen = ({ onSearch, onShortcutClick, background }) => {
 
       {/* Center content */}
       <div className="flex flex-col items-center w-full max-w-4xl">
-        <div className="bg-white p-4 rounded shadow mt-16">
+        <div className="p-4 rounded shadow mt-16">
           <img
             src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
             alt="Logo"

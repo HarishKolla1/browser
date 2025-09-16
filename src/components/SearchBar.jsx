@@ -89,7 +89,7 @@ const SearchBar = ({ onSearch, setQuery, query }) => {
                     handleSearch();
                 }
             }}
-            className="w-full pl-10 pr-10 py-1.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm text-gray-700"
+            className="w-full pl-10 pr-10 py-1.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
         />
 
         {/* search icon left*/}
